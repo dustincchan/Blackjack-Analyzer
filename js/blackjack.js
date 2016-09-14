@@ -1,3 +1,18 @@
+//a mess of arrays mapping a player's hand value to a dealer's upcard
+//this is hardcoded for now, but can be changed on the front-end later
+//4-Deck to 8-Deck basic strategy, dealer stands on soft 17 from wizardofodds.com
+var basicStrategyHard = {
+
+};
+
+var basicStrategySoft = {
+
+};
+
+var basicStrategySplits = {
+
+};
+
 var cardToValueMap = {
   "2": 2,
   "3": 3,
@@ -97,6 +112,11 @@ function Hand() {
       return [this.count, "Hard"];
     }
   };
+}
+
+//FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting
+function playRound(Shoe, bet, strategy) {
+
 }
 
 //Fisher-Yates shuffle algorithm
