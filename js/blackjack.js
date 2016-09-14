@@ -1,3 +1,19 @@
+var cardToValueMap = {
+  "2": 2,
+  "3": 3,
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  "7": 7,
+  "8": 8,
+  "9": 9,
+  "10": 10,
+  "J": 10,
+  "Q": 10,
+  "K": 10,
+  "A": 11
+};
+
 function Deck() {
   this.cards = [];
   var suits = ["Diamonds", "Clubs", "Hearts", "Spades"];
@@ -35,14 +51,52 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
     });
   });
 
-  function dealCard() { // -> [cardValue, suit]]
+  Shoe.prototype.dealCard = function() { // -> [cardValue, suit]]
     this.cards.shift();
-  }
+  };
 
   //identical to dealCard(), but makes the playing code more understandable
-  function burnCard() {
+  Show.prototype.burnCard = function() {
     this.cards.shift();
-  }
+  };
+}
+
+function Hand() {
+  this.count = 0;
+  this.cards = [];
+  var that = this;
+
+  //Not sure if this is necessary
+  Hand.prototype.getCard = function(card) {
+    that.cards.push(card);
+  };
+
+  Hand.prototype.getHandValue = function() {
+    that.count = 0;
+    var numberOfAces = 0;
+    this.cards.forEach(function(card) {
+      var cardValue = card[0];
+      var cardSuit = card[1];
+
+      if (cardValue === "A") {
+        numberOfAces += 1;
+      }
+
+      that.count += cardToValueMap[cardValue];
+    });
+
+    //We want to calculate a hard hand if the soft count goes over 21
+    while (numberOfAces > 0 && that.count >= 22) {
+      numberOfAces -= 1;
+      that.count -= 10;
+    }
+
+    if (numberOfAces > 0) {
+      return [this.count, "Soft"];
+    } else {
+      return [this.count, "Hard"];
+    }
+  };
 }
 
 //Fisher-Yates shuffle algorithm
