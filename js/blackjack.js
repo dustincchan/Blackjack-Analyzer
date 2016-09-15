@@ -1,6 +1,8 @@
 //a mess of arrays mapping a player's hand value to a dealer's upcard to the player move
 //this is hardcoded for now, but can be changed on the front-end later
 //4-Deck to 8-Deck basic strategy, dealer stands on soft 17 from wizardofodds.com
+
+//TEMPLATE: {2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: "", 10: "", "A": ""}
 var basicStrategyHard = {
   4: "HIT ALL",
   9: {2: "H", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
@@ -16,11 +18,18 @@ var basicStrategyHard = {
   19: "STAY ALL",
   20: "STAY ALL",
   21: "STAY ALL"
-  //TEMPLATE: {2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: "", 10: "", "A": ""}
 };
 
 var basicStrategySoft = {
-
+  13: {2: "H", 3: "H", 4: "H", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  14: {2: "H", 3: "H", 4: "H", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  15: {2: "H", 3: "H", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  16: {2: "H", 3: "H", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  17: {2: "H", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  18: {2: "S", 3: "DS", 4: "DS", 5: "DS", 6: "DS", 7: "S", 8: "S", 9: "H", 10: "H", "A": "H"},
+  19: "STAY ALL",
+  20: "STAY ALL",
+  21: "STAY ALL"
 };
 
 var basicStrategySplits = {
