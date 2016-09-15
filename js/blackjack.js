@@ -1,8 +1,22 @@
-//a mess of arrays mapping a player's hand value to a dealer's upcard
+//a mess of arrays mapping a player's hand value to a dealer's upcard to the player move
 //this is hardcoded for now, but can be changed on the front-end later
 //4-Deck to 8-Deck basic strategy, dealer stands on soft 17 from wizardofodds.com
 var basicStrategyHard = {
-
+  4: "HIT ALL",
+  9: {2: "H", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  10: {2: "DH", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "DH", 8: "DH", 9: "DH", 10: "H", "A": "H"},
+  11: {2: "DH", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "DH", 8: "DH", 9: "DH", 10: "DH", "A": "H"},
+  12: {2: "H", 3: "H", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  13: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  14: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  15: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "H", 10: "RH", "A": "H"},
+  16: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "RH", 10: "RH", "A": "RH"},
+  17: "STAY ALL",
+  18: "STAY ALL",
+  19: "STAY ALL",
+  20: "STAY ALL",
+  21: "STAY ALL"
+  //TEMPLATE: {2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: "", 10: "", "A": ""}
 };
 
 var basicStrategySoft = {
@@ -116,6 +130,19 @@ function Hand() {
 
 //FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting
 function playRound(Shoe, bet, strategy) {
+  //FIXME: coded for 1-vs-1 situation at the moment
+  //the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
+  var playerHand = new Hand();
+  var dealerHand = new Hand();
+
+  playerHand.getCard(Shoe.dealCard);
+  dealerHand.getCard(Shoe.dealCard);
+  playerHand.getCard(Shoe.dealCard);
+  dealerHand.getCard(Shoe.dealCard);
+  //first card dealt to dealer becomes its upcard
+  dealerUpCard = dealerHand.cards[0];
+
+  //now it's time to play the game
 
 }
 
