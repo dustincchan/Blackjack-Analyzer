@@ -4,7 +4,11 @@
 
 //TEMPLATE: {2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: "", 10: "", "A": ""}
 var basicStrategyHard = {
-  4: "HIT ALL",
+  4: {2: "H", 3: "H", 4: "H", 5: "H", 6: "H", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  5: {2: "H", 3: "H", 4: "H", 5: "H", 6: "H", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  6: {2: "H", 3: "H", 4: "H", 5: "H", 6: "H", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  7: {2: "H", 3: "H", 4: "H", 5: "H", 6: "H", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
+  8: {2: "H", 3: "H", 4: "H", 5: "H", 6: "H", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
   9: {2: "H", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
   10: {2: "DH", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "DH", 8: "DH", 9: "DH", 10: "H", "A": "H"},
   11: {2: "DH", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "DH", 8: "DH", 9: "DH", 10: "DH", "A": "H"},
@@ -13,11 +17,11 @@ var basicStrategyHard = {
   14: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
   15: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "H", 10: "RH", "A": "H"},
   16: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "H", 8: "H", 9: "RH", 10: "RH", "A": "RH"},
-  17: "STAY ALL",
-  18: "STAY ALL",
-  19: "STAY ALL",
-  20: "STAY ALL",
-  21: "STAY ALL"
+  17: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
+  18: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
+  19: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
+  20: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
+  21: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
 };
 
 var basicStrategySoft = {
@@ -27,9 +31,9 @@ var basicStrategySoft = {
   16: {2: "H", 3: "H", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
   17: {2: "H", 3: "DH", 4: "DH", 5: "DH", 6: "DH", 7: "H", 8: "H", 9: "H", 10: "H", "A": "H"},
   18: {2: "S", 3: "DS", 4: "DS", 5: "DS", 6: "DS", 7: "S", 8: "S", 9: "H", 10: "H", "A": "H"},
-  19: "STAY ALL",
-  20: "STAY ALL",
-  21: "STAY ALL"
+  19: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
+  20: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"},
+  21: {2: "S", 3: "S", 4: "S", 5: "S", 6: "S", 7: "S", 8: "S", 9: "S", 10: "S", "A": "S"}
 };
 
 var basicStrategySplits = {
@@ -105,6 +109,10 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
   this.burnCard = function() {
     return that.cards.shift();
   };
+  //might not be necessary
+  this.dealCard = function() {
+    return that.cards.shift();
+  };
 }
 
 function Hand() {
@@ -125,18 +133,6 @@ function Hand() {
 
       handTotal += cardToValueMap[cardValue];
     }
-    // that.cards.forEach(function(card) {
-    //   var cardValue = card[0];
-    //   console.log(cardValue);
-    //   var cardSuit = card[1];
-    //
-    //   if (cardValue === "A") {
-    //     numberOfAces += 1;
-    //   }
-    //
-    //   handTotal += cardToValueMap[cardValue];
-    // });
-
     //We want to calculate a hard hand if the soft count goes over 21
     while (numberOfAces > 0 && handTotal >= 22) {
       numberOfAces -= 1;
@@ -157,6 +153,10 @@ function Hand() {
     });
     console.log('---END---');
   };
+
+  this.receiveCard = function(card) {
+    this.cards.push(card);
+  };
 }
 
 //FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting
@@ -165,15 +165,69 @@ function playRound(shoe, bet, strategy) {
   var playerHand = new Hand();
   var dealerHand = new Hand();
 
-  playerHand.cards.push(shoe.cards.shift());
-  dealerHand.cards.push(shoe.cards.shift());
-  playerHand.cards.push(shoe.cards.shift());
-  dealerHand.cards.push(shoe.cards.shift());
+  for (var i = 0; i < 2; i++) {
+    playerHand.receiveCard(shoe.dealCard());
+    dealerHand.receiveCard(shoe.dealCard());
+  }
+  //first card dealt to dealer becomes its upcard
+  var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
+  //now it's time for the player to play the game
   playerHand.printCardsInHand();
   console.log(playerHand.getHandValue());
-  //first card dealt to dealer becomes its upcard
-  var dealerUpCard = dealerHand.cards[0];
-  //now it's time to play the game, check for splits or soft hands
+  console.log("DEALER UPCARD: " + dealerUpCard);
+  console.log(determinePlayerAction(playerHand, dealerUpCard));
+}
+
+function determinePlayerAction(hand, dealerUpCard) {
+  var handValue = parseInt(hand.getHandValue());
+  var dealerUpCardValue =  (["J", "Q", "K"].indexOf(dealerUpCard) !== -1) ? 10 : dealerUpCard;
+  if (dealerUpCardValue !== "A") {
+    dealerUpCardValue = parseInt(dealerUpCardValue);
+  }
+  //if initial hand then we can do double, split, etc
+  if (hand.cards.length === 2){
+    if (handValue === 21) {
+      return "BLACKJACK";
+    }
+    if (hand.cards[0][0] === hand.cards[1][0]) {
+      if (basicStrategySplits[hand.cards[0][0]] !== undefined) { //don't wanna split 5s
+        return basicStrategySplits[hand[0][0]][dealerUpCardValue];
+      }
+    } else if (handValue[1] === "Soft") { //soft hand
+      var playerActionSoft = basicStrategySoft[handValue][dealerUpCardValue];
+      if (playerActionSoft.length === 2) { //DS or DH
+        return playerActionSoft[0];
+      } else {
+        return playerActionSoft;
+      }
+    } else { //hard hand
+      var playerActionHard = basicStrategyHard[handValue][dealerUpCardValue];
+      if (playerActionHard.length === 2) { //RH or DH
+        return playerActionHard[0];
+      } else {
+        return playerActionHard;
+      }
+    }
+  } else { //plays after initial hand
+    if (hand.getHandValue() > 21) {
+      return "BUST";
+    }
+    if (handValue[1] === "Soft") {
+      var playerActionSoftAfterFirstHand = basicStrategySoft[handValue][dealerUpCardValue];
+      if (playerActionSoftAfterFirstHand.length === 2) {
+        return playerActionSoftAfterFirstHand[1];
+      } else {
+        return playerActionSoftAfterFirstHand;
+      }
+    } else { //hard hand > 2 cards
+      var playerActionHardAfterFirstHand = basicStrategyHard[handValue][dealerUpCardValue];
+      if (playerActionHardAFterFirstHand.length === 2) {
+        return playerActionHardAfterFirstHand[1];
+      } else {
+        return playerActionHardAfterFirstHand;
+      }
+    }
+  }
 }
 
 //Fisher-Yates shuffle algorithm
