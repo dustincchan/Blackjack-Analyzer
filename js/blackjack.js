@@ -173,16 +173,17 @@ function playRound(shoe, bet, strategy) {
   var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
   //now it's time for the player to play the game
   var playerAction = determinePlayerAction(playerHand, dealerUpCard);
-  if (playerAction === undefined) {
-    console.log('----SHIT FUCKED UP----');
+  if (playerAction === "R") {
     console.log(playerHand.getHandValue());
     console.log(dealerUpCard);
+    console.log(playerAction);
     console.log('----------------------');
   }
 }
 
 function determinePlayerAction(hand, dealerUpCard) {
-  var handValue = parseInt(hand.getHandValue());
+  var handValue = hand.getHandValue()[0];
+  var handType = hand.getHandValue()[1];
   var dealerUpCardValue =  (["J", "Q", "K"].indexOf(dealerUpCard) !== -1) ? 10 : dealerUpCard;
   if (dealerUpCardValue !== "A") {
     dealerUpCardValue = parseInt(dealerUpCardValue);
@@ -197,7 +198,7 @@ function determinePlayerAction(hand, dealerUpCard) {
       } else {
         return basicStrategyHard[handValue][dealerUpCardValue];
       }
-    } else if (handValue[1] === "Soft") { //soft hand
+    } else if (handType === "Soft") { //soft hand
       var playerActionSoft = basicStrategySoft[handValue][dealerUpCardValue];
       if (playerActionSoft.length === 2) { //DS or DH
         return playerActionSoft[0];
@@ -215,7 +216,7 @@ function determinePlayerAction(hand, dealerUpCard) {
   } else { //plays after initial hand
     if (handValue > 21) {
       return "BUST";
-    } else if (handValue[1] === "Soft") {
+    } else if (handType === "Soft") {
       var playerActionSoftAfterFirstHand = basicStrategySoft[handValue][dealerUpCardValue];
       if (playerActionSoftAfterFirstHand.length === 2) {
         return playerActionSoftAfterFirstHand[1];
