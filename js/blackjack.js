@@ -79,10 +79,12 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
   this.cards = [];
   var that = this;
 
+  if (numDecks === null || penetration === null) {
+    throw "You didn't specify the number of decks or the penetration";
+  }
+
   if (penetration > numDecks) {
-    throw new Error (
-      "You can't have more penetration than number of decks"
-    );
+    throw "You can't have more penetration than number of decks";
   }
 
   //We create a large array of (numDecks) decks and then shuffle it
@@ -91,77 +93,87 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
     this.decks.push(d.cards);
   }
 
+  //"flattening" an array of deck arrays
   //FIXME: There's a better way to do this, I just cant get array.prototype.concat() to play nice
   this.decks.forEach(function(deck) {
     deck.forEach(function(card) {
       that.cards.push(card);
     });
   });
-
-  Shoe.prototype.dealCard = function() { // -> [cardValue, suit]]
-    this.cards.shift();
-  };
-
+  this.cards = shuffle(this.cards);
   //identical to dealCard(), but makes the playing code more understandable
-  Show.prototype.burnCard = function() {
-    this.cards.shift();
+  this.burnCard = function() {
+    return that.cards.shift();
   };
 }
 
 function Hand() {
-  this.count = 0;
   this.cards = [];
   var that = this;
 
-  //Not sure if this is necessary
-  Hand.prototype.getCard = function(card) {
-    that.cards.push(card);
-  };
-
-  Hand.prototype.getHandValue = function() {
-    that.count = 0;
+  this.getHandValue = function() {
+    var handTotal = 0;
     var numberOfAces = 0;
-    this.cards.forEach(function(card) {
-      var cardValue = card[0];
-      var cardSuit = card[1];
+    for (var cardIndex = 0; cardIndex < that.cards.length; cardIndex++) {
+      var currentCard = that.cards[cardIndex];
+      var cardValue = currentCard[0];
+      var cardSuit = currentCard[1];
 
       if (cardValue === "A") {
         numberOfAces += 1;
       }
 
-      that.count += cardToValueMap[cardValue];
-    });
+      handTotal += cardToValueMap[cardValue];
+    }
+    // that.cards.forEach(function(card) {
+    //   var cardValue = card[0];
+    //   console.log(cardValue);
+    //   var cardSuit = card[1];
+    //
+    //   if (cardValue === "A") {
+    //     numberOfAces += 1;
+    //   }
+    //
+    //   handTotal += cardToValueMap[cardValue];
+    // });
 
     //We want to calculate a hard hand if the soft count goes over 21
-    while (numberOfAces > 0 && that.count >= 22) {
+    while (numberOfAces > 0 && handTotal >= 22) {
       numberOfAces -= 1;
-      that.count -= 10;
+      handTotal -= 10;
     }
 
     if (numberOfAces > 0) {
-      return [this.count, "Soft"];
+      return [handTotal, "Soft"];
     } else {
-      return [this.count, "Hard"];
+      return [handTotal, "Hard"];
     }
+  };
+
+  this.printCardsInHand = function() {
+    console.log('---HAND---');
+    this.cards.forEach(function(card) {
+      console.log(card[0] + " of " + card[1]);
+    });
+    console.log('---END---');
   };
 }
 
 //FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting
-function playRound(Shoe, bet, strategy) {
-  //FIXME: coded for 1-vs-1 situation at the moment
+function playRound(shoe, bet, strategy) {
   //the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
   var playerHand = new Hand();
   var dealerHand = new Hand();
 
-  playerHand.getCard(Shoe.dealCard);
-  dealerHand.getCard(Shoe.dealCard);
-  playerHand.getCard(Shoe.dealCard);
-  dealerHand.getCard(Shoe.dealCard);
+  playerHand.cards.push(shoe.cards.shift());
+  dealerHand.cards.push(shoe.cards.shift());
+  playerHand.cards.push(shoe.cards.shift());
+  dealerHand.cards.push(shoe.cards.shift());
+  playerHand.printCardsInHand();
+  console.log(playerHand.getHandValue());
   //first card dealt to dealer becomes its upcard
-  dealerUpCard = dealerHand.cards[0];
-
-  //now it's time to play the game
-
+  var dealerUpCard = dealerHand.cards[0];
+  //now it's time to play the game, check for splits or soft hands
 }
 
 //Fisher-Yates shuffle algorithm
@@ -182,3 +194,7 @@ function shuffle(array) {
 
   return array;
 }
+
+var s = new Shoe(8, 7);
+s.burnCard();
+playRound(s, 10, {});
