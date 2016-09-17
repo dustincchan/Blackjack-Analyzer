@@ -172,10 +172,13 @@ function playRound(shoe, bet, strategy) {
   //first card dealt to dealer becomes its upcard
   var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
   //now it's time for the player to play the game
-  playerHand.printCardsInHand();
-  console.log(playerHand.getHandValue());
-  console.log("DEALER UPCARD: " + dealerUpCard);
-  console.log(determinePlayerAction(playerHand, dealerUpCard));
+  var playerAction = determinePlayerAction(playerHand, dealerUpCard);
+  if (playerAction === undefined) {
+    console.log('----SHIT FUCKED UP----');
+    console.log(playerHand.getHandValue());
+    console.log(dealerUpCard);
+    console.log('----------------------');
+  }
 }
 
 function determinePlayerAction(hand, dealerUpCard) {
@@ -188,10 +191,11 @@ function determinePlayerAction(hand, dealerUpCard) {
   if (hand.cards.length === 2){
     if (handValue === 21) {
       return "BLACKJACK";
-    }
-    if (hand.cards[0][0] === hand.cards[1][0]) {
+    } else if (hand.cards[0][0] === hand.cards[1][0]) {
       if (basicStrategySplits[hand.cards[0][0]] !== undefined) { //don't wanna split 5s
-        return basicStrategySplits[hand[0][0]][dealerUpCardValue];
+        return basicStrategySplits[hand.cards[0][0]][dealerUpCardValue];
+      } else {
+        return basicStrategyHard[handValue][dealerUpCardValue];
       }
     } else if (handValue[1] === "Soft") { //soft hand
       var playerActionSoft = basicStrategySoft[handValue][dealerUpCardValue];
@@ -209,10 +213,9 @@ function determinePlayerAction(hand, dealerUpCard) {
       }
     }
   } else { //plays after initial hand
-    if (hand.getHandValue() > 21) {
+    if (handValue > 21) {
       return "BUST";
-    }
-    if (handValue[1] === "Soft") {
+    } else if (handValue[1] === "Soft") {
       var playerActionSoftAfterFirstHand = basicStrategySoft[handValue][dealerUpCardValue];
       if (playerActionSoftAfterFirstHand.length === 2) {
         return playerActionSoftAfterFirstHand[1];
@@ -249,6 +252,8 @@ function shuffle(array) {
   return array;
 }
 
-var s = new Shoe(8, 7);
+var s = new Shoe(100, 99);
 s.burnCard();
-playRound(s, 10, {});
+for (var i = 0; i < 200; i++) {
+  playRound(s, 10, {});
+}
