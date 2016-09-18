@@ -105,14 +105,15 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
     });
   });
   this.cards = shuffle(this.cards);
+
+  this.dealCard = function() {
+    return that.cards.shift();
+  };
   //identical to dealCard(), but makes the playing code more understandable
   this.burnCard = function() {
     return that.cards.shift();
   };
-  //might not be necessary
-  this.dealCard = function() {
-    return that.cards.shift();
-  };
+
 }
 
 function Hand() {
@@ -172,13 +173,62 @@ function playRound(shoe, bet, strategy) {
   //first card dealt to dealer becomes its upcard
   var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
   //now it's time for the player to play the game
-  var playerAction = determinePlayerAction(playerHand, dealerUpCard);
-  if (playerAction === "R") {
-    console.log(playerHand.getHandValue());
-    console.log(dealerUpCard);
-    console.log(playerAction);
-    console.log('----------------------');
+  var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
+  console.log(resultHands);
+}
+
+function playHandToCompletion(shoe, hand, dealerUpCard) {
+  //actions in order of priority are P, R, D, H/S
+  var playerAction = determinePlayerAction(hand, dealerUpCard);
+  if (playerAction === "BJ") {
+    return [hand, "BJ"];
+  } else if (playerAction == "P") {
+    console.log("dealerUpcard: " + dealerUpCard);
+    console.log(hand.printCardsInHand());
+    if (hand.cards[0][0] === "A") {
+      //remember splitting aces is different
+      return splitAces(hand, shoe);
+    } else {
+      var splitHands = splitHand(hand, shoe);
+      //recursively playing split hands
+      return playHandToCompletion(shoe, splitHands[0], dealerUpCard).concat(playHandToCompletion(shoe, splitHands[1], dealerUpCard));
+    }
+  } else if (playerAction == "D") {
+    hand.receiveCard(shoe.dealCard());
+    return [hand, "D"];
+  } else if (playerAction == "R") {
+    return [hand, "R"];
+  } else if (playerAction == "H") { // recursively call this function
+    hand.receiveCard(shoe.dealCard());
+    return playHandToCompletion(shoe, hand, dealerUpCard);
+  } else if (playerAction == "S") {
+    return [hand, "S"];
+  } else if (playerAction == "BUST") {
+    return [hand, "BUST"];
   }
+}
+
+function splitHand(hand, shoe) {
+  //not really the kosher way to do it, but easier to program & statistically the same
+  //could have a dealIncompleteHand() function to handle hands w/ only 1 card dealt
+  var firstHand = new Hand();
+  var secondHand = new Hand();
+  firstHand.receiveCard(hand.cards[0]);
+  secondHand.receiveCard(hand.cards[1]);
+  firstHand.receiveCard(shoe.dealCard());
+  secondHand.receiveCard(shoe.dealCard());
+  return [firstHand, secondHand];
+}
+
+function splitAces(hand, shoe) { // -> [Hand, "S"], [Hand, "S"]
+//programmed for rule where you can't resplit aces nor hit after splitting
+  var firstHand = new Hand();
+  var secondHand = new Hand();
+  firstHand.receiveCard(hand.cards[0]);
+  secondHand.receiveCard(hand.cards[1]);
+  firstHand.receiveCard(shoe.dealCard());
+  secondHand.receiveCard(shoe.dealCard());
+  return [firstHand, "S", secondHand, "S"];
 }
 
 function determinePlayerAction(hand, dealerUpCard) {
@@ -191,12 +241,18 @@ function determinePlayerAction(hand, dealerUpCard) {
   //if initial hand then we can do double, split, etc
   if (hand.cards.length === 2){
     if (handValue === 21) {
-      return "BLACKJACK";
+      return "BJ";
     } else if (hand.cards[0][0] === hand.cards[1][0]) {
       if (basicStrategySplits[hand.cards[0][0]] !== undefined) { //don't wanna split 5s
         return basicStrategySplits[hand.cards[0][0]][dealerUpCardValue];
       } else {
-        return basicStrategyHard[handValue][dealerUpCardValue];
+        //treat it as a hard hand
+        var playerActionNoSplit = basicStrategyHard[handValue][dealerUpCardValue];
+        if (playerActionNoSplit.length === 2) {
+          return playerActionNoSplit[0];
+        } else {
+          return playerActionNoSplit;
+        }
       }
     } else if (handType === "Soft") { //soft hand
       var playerActionSoft = basicStrategySoft[handValue][dealerUpCardValue];
@@ -225,7 +281,7 @@ function determinePlayerAction(hand, dealerUpCard) {
       }
     } else { //hard hand > 2 cards
       var playerActionHardAfterFirstHand = basicStrategyHard[handValue][dealerUpCardValue];
-      if (playerActionHardAFterFirstHand.length === 2) {
+      if (playerActionHardAfterFirstHand.length === 2) {
         return playerActionHardAfterFirstHand[1];
       } else {
         return playerActionHardAfterFirstHand;
@@ -253,8 +309,7 @@ function shuffle(array) {
   return array;
 }
 
-var s = new Shoe(100, 99);
-s.burnCard();
-for (var i = 0; i < 200; i++) {
+var s = new Shoe(8, 7);
+for (var i = 0; i < 50; i++) {
   playRound(s, 10, {});
 }
