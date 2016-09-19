@@ -1,32 +1,33 @@
-var myConfig =
-    {
-        "type":"bar",
-        "plot":{ //global changes to all series
-            "alpha":0.7,
-            "border-width":2,
-            "border-color":"black",
-            "border-radius-top-left":5,
-            "border-radius-top-right":5,
-            "hoverState":{
-              "backgroundColor":"#909090"
-            }
-        },
-        "series":[
-            {
-                "values":[28,19,30,35,46,36],
-            },
-            {
-                "values":[11,7,14,11,24,22],
-            },
-            {
-                "values":[18,25,35,16,31,18],
-            }
-        ]
-    };
+var s = new Shoe(8, 7); //8 decks, 7 deck penetration
+var resultingBankRolls = [];
+for (var i = 0; i < 1000; i++) {
+  bankRoll = 0;
+  playNHands(s, 200, 5);
+  resultingBankRolls.push(bankRoll);
+}
+var median = resultingBankRolls.sort()[resultingBankRolls.length/2];
+var sum = 0;
+for (var j = 0; j < resultingBankRolls.length; j++) {
+  sum += resultingBankRolls[j];
+}
+var mean = sum * 1.0 / resultingBankRolls.length;
 
-zingchart.render({
-	id : 'histogram',
-	data : myConfig,
-	height: 400,
-	width: 1000
-});
+
+
+var data = [
+  {
+    x: resultingBankRolls,
+    type: 'histogram',
+	marker: {
+    color: 'rgba(100,250,100,0.7)',
+	},
+  }
+];
+
+var layout = {
+  title: "Resulting Banksrolls (Basic Strategy, Flat Betting ($5), 1000 sessions of 100 hands)",
+  xaxis: {title: "Ending Bankroll (σ: " + mean + " median: " + median + ")"},
+  yaxis: {title: "Count"}
+};
+
+Plotly.newPlot('histogram', data, layout);

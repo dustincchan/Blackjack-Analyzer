@@ -7,7 +7,7 @@ chartHeight = Math.round(Math.max(Math.abs(lowestBankRollValue), highestBankRoll
 tickHeight = Math.round(chartHeight / 10);
 
 zingchart.THEME="classic";
-var myConfig =
+var lineChartConfig =
         {
             "type": "line",
             "background-color": "#003849",
@@ -137,7 +137,7 @@ var myConfig =
 
 zingchart.render({
 	id : 'lineChart',
-	data : myConfig,
+	data : lineChartConfig,
 	height: 500,
 	width: 1000
 });
