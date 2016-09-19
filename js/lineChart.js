@@ -139,5 +139,5 @@ zingchart.render({
 	id : 'lineChart',
 	data : myConfig,
 	height: 500,
-	width: "100%"
+	width: 1000
 });

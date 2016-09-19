@@ -28,5 +28,5 @@ zingchart.render({
 	id : 'histogram',
 	data : myConfig,
 	height: 400,
-	width: '100%'
+	width: 1000
 });
