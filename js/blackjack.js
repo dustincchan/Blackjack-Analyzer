@@ -393,8 +393,8 @@ function playRound(shoe, initialBet) {
   //first card dealt to dealer becomes its upcard
   var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
   //now it's time for the player to play the game
-  console.log("dealerUpcard: " + dealerUpCard);
   playerHand.printCardsInHand();
+  console.log("dealerUpcard: " + dealerUpCard);
   var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
   console.log(resultHands);
   console.log('----DEALER HAND---');
@@ -407,7 +407,9 @@ function playRound(shoe, initialBet) {
   var roundResults = determineWinnerForHands(resultHands, dealerHand);
   console.log(roundResults);
   var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer
+  bankRoll += payout;
   console.log("Payout: $" + payout);
+  console.log("Bankroll: $" + bankRoll);
   console.log("");
 }
 
