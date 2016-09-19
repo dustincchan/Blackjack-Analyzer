@@ -111,7 +111,7 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
       this.decks.push(d.cards);
     }
     //"flattening" an array of deck arrays
-    //FIXME: There's a better way to do this, I just cant get Array.prototype.concat() to play nice
+    //TODO: There's a better way to do this, I just cant get Array.prototype.concat() to play nice
     this.decks.forEach(function(deck) {
       deck.forEach(function(card) {
         that.cards.push(card);
@@ -218,7 +218,7 @@ function splitHand(hand, shoe) {
 
 function splitAces(hand, shoe) { // -> [Hand, "S"], [Hand, "S"]
 //programmed for rule where you can't resplit aces nor hit after splitting
-//FIXME: doesn't allow re-split of aces
+//TODO: doesn't allow re-split of aces
   var firstHand = new Hand();
   var secondHand = new Hand();
   firstHand.receiveCard(hand.cards[0]);
@@ -306,7 +306,7 @@ function shuffle(array) {
   return array;
 }
 
-//FIXME: accommodate HIT s-17 or STAND s-17 rule
+//TODO: accommodate HIT s-17 or STAND s-17 rule
 function playDealerHand(dealerHand, shoe) {
   var dealerHandValue = dealerHand.getHandValue()[0];
   //hard coded for STAND on soft-17
@@ -353,7 +353,7 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
   return results;
 }
 
-//FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting ¯\_(ツ)_/¯
+//TODO: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting ¯\_(ツ)_/¯
 function playRound(shoe, initialBet) {
 //the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
   var playerHand = new Hand();
