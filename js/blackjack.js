@@ -325,7 +325,10 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
     var currentHand = playerHands[handIndex];
     var currentHandValue = currentHand.getHandValue();
     // if player busted he/she loses no matter what
-    if (currentHandValue[1] === "BUST") {
+    if (playerAction === "BJ" && dealerHandValue[1] !== "BJ") {
+      console.log("NATURAL BJ");
+      results.push("NATURAL BLACKJACK");
+    } else if (playerAction === "BUST") {
       results.push("LOSS");
     } else if (playerAction === "R") {
       results.push("SURRENDER");
@@ -353,6 +356,30 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
   return results;
 }
 
+//calculates how much was won/lost based on hand results for that round
+//TODO: Uh oh... I think...a split natural BJ gets treated as a natural bj
+function determinePayout(roundResults, initialBet) {
+  var payout = 0;
+  roundResults.forEach(function(result) {
+    if (result === "NATURAL BLACKJACK") {
+      payout += initialBet * 1.5;
+    } else if (result === "WIN") {
+      payout += initialBet;
+    } else if (result === "LOSS") {
+      payout -= initialBet;
+    } else if (result === "DOUBLE WIN") {
+      payout += initialBet * 2;
+    } else if (result === "DOUBLE LOSS") {
+      payout -= initialBet * 2;
+    } else if (result === "SURRENDER") {
+      //lose half of bet
+      payout -= initialBet * 1.0 / 2;
+    }
+  });
+
+  return payout;
+}
+
 //TODO: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting ¯\_(ツ)_/¯
 function playRound(shoe, initialBet) {
 //the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
@@ -375,8 +402,12 @@ function playRound(shoe, initialBet) {
   //player hand(s) completed, play dealer hand then determine winner
   playDealerHand(dealerHand, shoe);
   console.log("Dealer Total: " + dealerHand.getHandValue()[0]);
-  var handResults = determineWinnerForHands(resultHands, dealerHand);
-  console.log(handResults);
+
+  //handResults will look like ["WIN", "DOUBLE WIN"] (usually just 1 element unless split)
+  var roundResults = determineWinnerForHands(resultHands, dealerHand);
+  console.log(roundResults);
+  var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer
+  console.log("Payout: $" + payout);
   console.log("");
 }
 
@@ -387,7 +418,6 @@ function playNHands(shoe, numHands, minBet) {
     if (shoe.isPastPenetration()) {
       shoe.reloadShoe();
     }
-
     playRound(shoe, minBet);
   }
 }
