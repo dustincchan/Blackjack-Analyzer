@@ -66,6 +66,9 @@ var cardToValueMap = {
 };
 //this should be implemented more intelligently
 var bankRoll = 0;
+var bankRollHistory = [0];
+var lowestBankRollValue = 0;
+var highestBankRollValue = 0;
 
 function Deck() {
   this.cards = [];
@@ -405,8 +408,15 @@ function playRound(shoe, initialBet) {
   //handResults will look like ["WIN", "DOUBLE WIN"] (usually just 1 element unless split)
   var roundResults = determineWinnerForHands(resultHands, dealerHand);
   // console.log(roundResults);
-  var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer
+  var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer)
   bankRoll += payout;
+  bankRollHistory.push(bankRoll);
+  if (bankRoll < lowestBankRollValue) {
+    lowestBankRollValue = bankRoll;
+  }
+  if (bankRoll > highestBankRollValue) {
+    highestBankRollValue = bankRoll;
+  }
   // console.log("Payout: $" + payout);
 }
 
@@ -420,7 +430,3 @@ function playNHands(shoe, numHands, minBet) {
     playRound(shoe, minBet);
   }
 }
-
-var s = new Shoe(8, 7); //8 decks, 7 deck penetration
-playNHands(s, 200, 5);
-console.log("Bankroll: $" + bankRoll);

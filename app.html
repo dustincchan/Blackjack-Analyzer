@@ -5,14 +5,18 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link href="https://fonts.googleapis.com/css?family=David+Libre|Hind:400,700" rel="stylesheet">
 	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<title>Blackjack Analyzer</title>
 </head>
 <body>
-	<h1>MAIN STUFF</h1>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-	<script>
-		if( !window.jQuery ) document.write('<script src="js/jquery-3.0.0.min.js"><\/script>');
-	</script>
+	<div id="myChart" width="500" height="300"></div>
+
+
+	<script src="js/jquery-3.0.0.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src= "https://cdn.zingchart.com/zingchart.min.js"></script>
+	<script> zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
+		ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9","ee6b7db5b51705a13dc2339db3edaf6d"];</script>
 	<script src="js/blackjack.js"></script>
 	<script src="js/frontend.js"></script> <!-- Resource jQuery -->
 </body>
