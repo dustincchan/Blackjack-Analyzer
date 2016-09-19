@@ -4,7 +4,7 @@ console.log("Bankroll: $" + bankRoll);
 console.log(lowestBankRollValue);
 console.log(highestBankRollValue);
 chartHeight = Math.round(Math.max(Math.abs(lowestBankRollValue), highestBankRollValue));
-chartDivision = Math.round(chartHeight / 10);
+tickHeight = Math.round(chartHeight / 10);
 
 zingchart.THEME="classic";
 var myConfig =
@@ -39,9 +39,9 @@ var myConfig =
                 }
             },
             "scale-x": {
-                "min-value": 1383292800000,
+                "min-value": 0,
                 "shadow": 0,
-                "step": 3600000,
+                "step": 1,
                 "line-color": "#f6f7f8",
                 "tick": {
                     "line-color": "#f6f7f8"
@@ -52,23 +52,15 @@ var myConfig =
                 "item": {
                     "font-color": "#f6f7f8"
                 },
-                "transform": {
-                    "type": "date",
-                    "all": "%D, %d %M<br />%h:%i %A",
-                    "guide": {
-                        "visible": false
-                    },
-                    "item": {
-                        "visible": false
-                    }
-                },
-                "label": {
-                    "visible": false
-                },
+
+								"label": {
+										"text": "Number of Hands Played",
+										"font-color": "#f6f7f8"
+								},
                 "minor-ticks": 0
             },
             "scale-y": {
-                "values": -chartHeight + ":" + chartHeight + ":" + chartDivision,
+                "values": -chartHeight + ":" + chartHeight + ":" + tickHeight,
                 "line-color": "#f6f7f8",
                 "shadow": 0,
                 "tick": {
@@ -82,7 +74,7 @@ var myConfig =
                     "font-color": "#f6f7f8"
                 },
                 "label": {
-                    "text": "Page Views",
+                    "text": "Bankroll ($)",
                     "font-color": "#f6f7f8"
                 },
                 "minor-ticks": 0,
@@ -144,8 +136,8 @@ var myConfig =
         };
 
 zingchart.render({
-	id : 'myChart',
+	id : 'lineChart',
 	data : myConfig,
 	height: 500,
-	width: 725
+	width: "100%"
 });
