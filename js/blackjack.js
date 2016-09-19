@@ -64,6 +64,8 @@ var cardToValueMap = {
   "K": 10,
   "A": 11
 };
+//this should be implemented more intelligently
+var bankRoll = 0;
 
 function Deck() {
   this.cards = [];
@@ -81,6 +83,8 @@ function Deck() {
 function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
   this.decks = [];
   this.cards = [];
+  this.numDecks = numDecks;
+  this.penetration = penetration;
   var that = this;
 
   if (numDecks === null || penetration === null) {
@@ -91,21 +95,6 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
     throw "You can't have more penetration than number of decks";
   }
 
-  //We create a large array of (numDecks) decks and then shuffle it
-  for (var deckNum = 0; deckNum < numDecks; deckNum ++) {
-    var d = new Deck();
-    this.decks.push(d.cards);
-  }
-
-  //"flattening" an array of deck arrays
-  //FIXME: There's a better way to do this, I just cant get array.prototype.concat() to play nice
-  this.decks.forEach(function(deck) {
-    deck.forEach(function(card) {
-      that.cards.push(card);
-    });
-  });
-  this.cards = shuffle(this.cards);
-
   this.dealCard = function() {
     return that.cards.shift();
   };
@@ -113,6 +102,32 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
   this.burnCard = function() {
     return that.cards.shift();
   };
+
+  //triggered after drawing past penetration
+  this.reloadShoe = function() {
+    //We create a large array of (numDecks) decks and then shuffle it
+    for (var deckNum = 0; deckNum < numDecks; deckNum ++) {
+      var d = new Deck();
+      this.decks.push(d.cards);
+    }
+    //"flattening" an array of deck arrays
+    //FIXME: There's a better way to do this, I just cant get Array.prototype.concat() to play nice
+    this.decks.forEach(function(deck) {
+      deck.forEach(function(card) {
+        that.cards.push(card);
+      });
+    });
+    this.cards = shuffle(this.cards);
+    this.burnCard();
+  };
+  //initial call from Shoe initialization
+  this.reloadShoe();
+
+  this.isPastPenetration = function() { // -> Bool
+    return this.cards.length < (this.numDecks - this.penetration) * 52;
+  };
+
+
 
 }
 
@@ -160,33 +175,13 @@ function Hand() {
   };
 }
 
-//FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting
-function playRound(shoe, bet, strategy) {
-  //the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
-  var playerHand = new Hand();
-  var dealerHand = new Hand();
-
-  for (var i = 0; i < 2; i++) {
-    playerHand.receiveCard(shoe.dealCard());
-    dealerHand.receiveCard(shoe.dealCard());
-  }
-  //first card dealt to dealer becomes its upcard
-  var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
-  //now it's time for the player to play the game
-  var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
-  console.log(resultHands);
-}
-
 function playHandToCompletion(shoe, hand, dealerUpCard) {
   //actions in order of priority are P, R, D, H/S
   var playerAction = determinePlayerAction(hand, dealerUpCard);
   if (playerAction === "BJ") {
     return [hand, "BJ"];
   } else if (playerAction == "P") {
-    console.log("dealerUpcard: " + dealerUpCard);
-    console.log(hand.printCardsInHand());
     if (hand.cards[0][0] === "A") {
-      //remember splitting aces is different
       return splitAces(hand, shoe);
     } else {
       var splitHands = splitHand(hand, shoe);
@@ -209,6 +204,7 @@ function playHandToCompletion(shoe, hand, dealerUpCard) {
 }
 
 function splitHand(hand, shoe) {
+  //TODO: you usually can't re-hit/double split Aces, but need to be flexible depending on rules.
   //not really the kosher way to do it, but easier to program & statistically the same
   //could have a dealIncompleteHand() function to handle hands w/ only 1 card dealt
   var firstHand = new Hand();
@@ -222,6 +218,7 @@ function splitHand(hand, shoe) {
 
 function splitAces(hand, shoe) { // -> [Hand, "S"], [Hand, "S"]
 //programmed for rule where you can't resplit aces nor hit after splitting
+//FIXME: doesn't allow re-split of aces
   var firstHand = new Hand();
   var secondHand = new Hand();
   firstHand.receiveCard(hand.cards[0]);
@@ -309,7 +306,91 @@ function shuffle(array) {
   return array;
 }
 
-var s = new Shoe(8, 7);
-for (var i = 0; i < 50; i++) {
-  playRound(s, 10, {});
+//FIXME: accommodate HIT s-17 or STAND s-17 rule
+function playDealerHand(dealerHand, shoe) {
+  var dealerHandValue = dealerHand.getHandValue()[0];
+  //hard coded for STAND on soft-17
+  while (dealerHandValue < 17) {
+    dealerHand.receiveCard(shoe.dealCard());
+    dealerHandValue = dealerHand.getHandValue()[0];
+  }
 }
+
+function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PLAYER", "PUSH", etc...]
+  var dealerHandValue = dealerHand.getHandValue();
+  var results = [];
+
+  for (var handIndex = 0; handIndex < playerHands.length; handIndex += 2) {
+    var playerAction = playerHands[handIndex + 1]; //have to track if user doubled or surrendered
+    var currentHand = playerHands[handIndex];
+    var currentHandValue = currentHand.getHandValue();
+    // if player busted he/she loses no matter what
+    if (currentHandValue[1] === "BUST") {
+      results.push("LOSS");
+    } else if (playerAction === "R") {
+      results.push("SURRENDER");
+    } else {
+      // if the dealer busted but the player didn't, player always wins
+      if (currentHandValue[0] <= 21 && dealerHandValue[0] > 21) {
+        results.push(playerAction === "D" ? "DOUBLE WIN" : "WIN");
+      } else if (currentHandValue[0] <= 21 && dealerHandValue[0] <= 21) {
+        // if neither the dealer nor the player busted
+        if (currentHandValue[0] === dealerHandValue[0]) {
+          // push if dealer has same standing val as the player
+          results.push("PUSH");
+        } else if (currentHandValue[0] > dealerHandValue[0]) {
+          // player wins if his/her card total > dealer's
+          results.push(playerAction === "D" ? "DOUBLE WIN" : "WIN");
+        } else if (currentHandValue[0] < dealerHandValue[0]) {
+          //wrote the logic redundantly because I don't want false positives for a dealer win
+          results.push(playerAction === "D" ? "DOUBLE LOSS" : "LOSS");
+        } else {
+          throw "We could not figure out who won the hand";
+        }
+      }
+    }
+  }
+  return results;
+}
+
+//FIXME: this only simulates 1-on-1 games with the dealer, which I guess is ideal for card counting ¯\_(ツ)_/¯
+function playRound(shoe, initialBet) {
+//the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
+  var playerHand = new Hand();
+  var dealerHand = new Hand();
+
+  for (var i = 0; i < 2; i++) {
+    playerHand.receiveCard(shoe.dealCard());
+    dealerHand.receiveCard(shoe.dealCard());
+  }
+  //first card dealt to dealer becomes its upcard
+  var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
+  //now it's time for the player to play the game
+  console.log("dealerUpcard: " + dealerUpCard);
+  playerHand.printCardsInHand();
+  var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
+  console.log(resultHands);
+  console.log('----DEALER HAND---');
+
+  //player hand(s) completed, play dealer hand then determine winner
+  playDealerHand(dealerHand, shoe);
+  console.log("Dealer Total: " + dealerHand.getHandValue()[0]);
+  var handResults = determineWinnerForHands(resultHands, dealerHand);
+  console.log(handResults);
+  console.log("");
+}
+
+//bringing everything together
+function playNHands(shoe, numHands, minBet) {
+  for (var i = 0; i < numHands; i++) {
+    //gotta shuffle the shoe eventually
+    if (shoe.isPastPenetration()) {
+      shoe.reloadShoe();
+    }
+
+    playRound(shoe, minBet);
+  }
+}
+
+var s = new Shoe(8, 7); //8 decks, 7 deck penetration
+playNHands(s, 50, 5);
