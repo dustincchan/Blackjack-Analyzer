@@ -326,7 +326,6 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
     var currentHandValue = currentHand.getHandValue();
     // if player busted he/she loses no matter what
     if (playerAction === "BJ" && dealerHandValue[1] !== "BJ") {
-      console.log("NATURAL BJ");
       results.push("NATURAL BLACKJACK");
     } else if (playerAction === "BUST") {
       results.push("LOSS");
@@ -393,24 +392,22 @@ function playRound(shoe, initialBet) {
   //first card dealt to dealer becomes its upcard
   var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
   //now it's time for the player to play the game
-  playerHand.printCardsInHand();
-  console.log("dealerUpcard: " + dealerUpCard);
+  // playerHand.printCardsInHand();
+  // console.log("dealerUpcard: " + dealerUpCard);
   var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
-  console.log(resultHands);
-  console.log('----DEALER HAND---');
+  // console.log(resultHands);
+  // console.log('----DEALER HAND---');
 
   //player hand(s) completed, play dealer hand then determine winner
   playDealerHand(dealerHand, shoe);
-  console.log("Dealer Total: " + dealerHand.getHandValue()[0]);
+  // console.log("Dealer Total: " + dealerHand.getHandValue()[0]);
 
   //handResults will look like ["WIN", "DOUBLE WIN"] (usually just 1 element unless split)
   var roundResults = determineWinnerForHands(resultHands, dealerHand);
-  console.log(roundResults);
+  // console.log(roundResults);
   var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer
   bankRoll += payout;
-  console.log("Payout: $" + payout);
-  console.log("Bankroll: $" + bankRoll);
-  console.log("");
+  // console.log("Payout: $" + payout);
 }
 
 //bringing everything together
@@ -425,4 +422,5 @@ function playNHands(shoe, numHands, minBet) {
 }
 
 var s = new Shoe(8, 7); //8 decks, 7 deck penetration
-playNHands(s, 50, 5);
+playNHands(s, 200, 5);
+console.log("Bankroll: $" + bankRoll);
