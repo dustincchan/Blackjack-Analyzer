@@ -1,8 +1,10 @@
 var s = new Shoe(8, 7); //8 decks, 7 deck penetration
-playNHands(s, 10000, 5);
+playNHands(s, 20000, 5);
 console.log("Bankroll: $" + bankRoll);
 console.log(lowestBankRollValue);
 console.log(highestBankRollValue);
+chartHeight = Math.round(Math.max(Math.abs(lowestBankRollValue), highestBankRollValue));
+chartDivision = Math.round(chartHeight / 10);
 
 zingchart.THEME="classic";
 var myConfig =
@@ -66,7 +68,7 @@ var myConfig =
                 "minor-ticks": 0
             },
             "scale-y": {
-                "values": lowestBankRollValue + ":" + highestBankRollValue + ":" + (highestBankRollValue - lowestBankRollValue) / 10,
+                "values": -chartHeight + ":" + chartHeight + ":" + chartDivision,
                 "line-color": "#f6f7f8",
                 "shadow": 0,
                 "tick": {
