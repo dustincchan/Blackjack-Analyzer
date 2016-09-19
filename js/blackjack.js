@@ -312,10 +312,14 @@ function shuffle(array) {
 //TODO: accommodate HIT s-17 or STAND s-17 rule
 function playDealerHand(dealerHand, shoe) {
   var dealerHandValue = dealerHand.getHandValue()[0];
-  //hard coded for STAND on soft-17
+  //hard coded for HIT on soft-17
   while (dealerHandValue < 17) {
     dealerHand.receiveCard(shoe.dealCard());
     dealerHandValue = dealerHand.getHandValue()[0];
+  }
+  //draw once more if soft 17
+  if (dealerHandValue[0] === 17 && dealerHandValue[1] === "Soft") {
+    dealerHand.receiveCard(shoe.dealCard());
   }
 }
 
