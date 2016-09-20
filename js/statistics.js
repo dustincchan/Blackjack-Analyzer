@@ -12,7 +12,7 @@ function getStatistics(arr) {
     for (var j = 0; j < arr.length; j++) {
       squaredDifferences += Math.pow((arr[j] - mean), 2);
     }
-    var standardDeviation = Math.round(Math.sqrt(squaredDifferences));
+    var standardDeviation = Math.round(Math.sqrt(squaredDifferences) / arr.length);
 
     return {"mean": mean, "median": median, "standardDeviation": standardDeviation};
 }
