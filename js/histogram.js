@@ -5,14 +5,8 @@ for (var i = 0; i < 1000; i++) {
   playNHands(s, 200, 5);
   resultingBankRolls.push(bankRoll);
 }
-var median = resultingBankRolls.sort()[resultingBankRolls.length/2];
-var sum = 0;
-for (var j = 0; j < resultingBankRolls.length; j++) {
-  sum += resultingBankRolls[j];
-}
-var mean = sum * 1.0 / resultingBankRolls.length;
 
-
+var statistics = getStatistics(resultingBankRolls);
 
 var data = [
   {
@@ -26,7 +20,7 @@ var data = [
 
 var layout = {
   title: "Resulting Banksrolls (Basic Strategy, Flat Betting ($5), 1000 sessions of 100 hands)",
-  xaxis: {title: "Ending Bankroll (σ: " + mean + " median: " + median + ")"},
+  xaxis: {title: "Ending Bankroll (mean: " + statistics.mean + " | median: " + statistics.median + " | standard deviation: " + statistics.standardDeviation + ")"},
   yaxis: {title: "Count"}
 };
 
