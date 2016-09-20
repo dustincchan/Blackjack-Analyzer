@@ -179,6 +179,10 @@ function Hand() {
 }
 
 function playHandToCompletion(shoe, hand, dealerUpCard) {
+  //this may have been called after a split, deal us a card before playing
+  if (hand.cards.length === 1) {
+    hand.receiveCard(shoe.dealCard());
+  }
   //actions in order of priority are P, R, D, H/S
   var playerAction = determinePlayerAction(hand, dealerUpCard);
   if (playerAction === "BJ") {
@@ -208,14 +212,10 @@ function playHandToCompletion(shoe, hand, dealerUpCard) {
 
 function splitHand(hand, shoe) {
   //TODO: you usually can't re-hit/double split Aces, but need to be flexible depending on rules.
-  //not really the kosher way to do it, but easier to program & statistically the same
-  //could have a dealIncompleteHand() function to handle hands w/ only 1 card dealt
   var firstHand = new Hand();
   var secondHand = new Hand();
   firstHand.receiveCard(hand.cards[0]);
   secondHand.receiveCard(hand.cards[1]);
-  firstHand.receiveCard(shoe.dealCard());
-  secondHand.receiveCard(shoe.dealCard());
   return [firstHand, secondHand];
 }
 

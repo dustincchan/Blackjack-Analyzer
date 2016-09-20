@@ -19,7 +19,7 @@ var data = [
 ];
 
 var layout = {
-  title: "Resulting Banksrolls (Basic Strategy, Flat Betting ($5), 1000 sessions of 100 hands)",
+  title: "Basic Strategy, Flat Betting $5, 1000 sessions of 500 hands (500,000 total hands)",
   xaxis: {title: "Ending Bankroll (mean: " + statistics.mean + " | median: " + statistics.median + " | standard deviation: " + statistics.standardDeviation + ")"},
   yaxis: {title: "Count"}
 };
