@@ -178,34 +178,48 @@ function Hand() {
   };
 }
 
-function playHandToCompletion(shoe, hand, dealerUpCard) {
+function playHandToCompletion(shoe, hand, dealerUpCard, splitCount) {
+  var playerAction;
   //this may have been called after a split, deal us a card before playing
   if (hand.cards.length === 1) {
     hand.receiveCard(shoe.dealCard());
   }
   //actions in order of priority are P, R, D, H/S
-  var playerAction = determinePlayerAction(hand, dealerUpCard);
+  if (splitCount === undefined || splitCount < 4) {
+    playerAction = determinePlayerAction(hand, dealerUpCard);
+  } else if (splitCount >= 4) {
+    //treat hand as hard value
+    var handValue = hand.getHandValue()[0];
+    var dealerUpCardValue =  (["J", "Q", "K"].indexOf(dealerUpCard) !== -1) ? 10 : dealerUpCard;
+    if (dealerUpCardValue !== "A") {
+      dealerUpCardValue = parseInt(dealerUpCardValue);
+    }
+    playerAction = basicStrategyHard[handValue][dealerUpCardValue][0];
+  }
   if (playerAction === "BJ") {
     return [hand, "BJ"];
-  } else if (playerAction == "P") {
+  } else if (playerAction === "P") {
+    if (splitCount === undefined) {
+      splitCount = 0;
+    }
     if (hand.cards[0][0] === "A") {
       return splitAces(hand, shoe);
     } else {
       var splitHands = splitHand(hand, shoe);
       //recursively playing split hands
-      return playHandToCompletion(shoe, splitHands[0], dealerUpCard).concat(playHandToCompletion(shoe, splitHands[1], dealerUpCard));
+      return playHandToCompletion(shoe, splitHands[0], dealerUpCard, splitCount + 1).concat(playHandToCompletion(shoe, splitHands[1], dealerUpCard, splitCount + 1));
     }
-  } else if (playerAction == "D") {
+  } else if (playerAction === "D") {
     hand.receiveCard(shoe.dealCard());
     return [hand, "D"];
-  } else if (playerAction == "R") {
+  } else if (playerAction === "R") {
     return [hand, "R"];
-  } else if (playerAction == "H") { // recursively call this function
+  } else if (playerAction === "H") { // recursively call this function
     hand.receiveCard(shoe.dealCard());
     return playHandToCompletion(shoe, hand, dealerUpCard);
-  } else if (playerAction == "S") {
+  } else if (playerAction === "S") {
     return [hand, "S"];
-  } else if (playerAction == "BUST") {
+  } else if (playerAction === "BUST") {
     return [hand, "BUST"];
   }
 }
@@ -331,7 +345,8 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
     var playerAction = playerHands[handIndex + 1]; //have to track if user doubled or surrendered
     var currentHand = playerHands[handIndex];
     var currentHandValue = currentHand.getHandValue();
-    // if player busted he/she loses no matter what
+    // if player busted he/she loses no matter what)
+    //FIXME: check for blackjack before allowing player to play game
     if (playerAction === "BJ" && dealerHandValue[1] !== "BJ") {
       results.push("NATURAL BLACKJACK");
     } else if (playerAction === "BUST") {
@@ -364,6 +379,7 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
 
 //calculates how much was won/lost based on hand results for that round
 //TODO: Uh oh... I think...a split natural BJ gets treated as a natural bj
+//TODO: I FORGOT INSURANCE
 function determinePayout(roundResults, initialBet) {
   var payout = 0;
   roundResults.forEach(function(result) {
@@ -379,7 +395,7 @@ function determinePayout(roundResults, initialBet) {
       payout -= initialBet * 2;
     } else if (result === "SURRENDER") {
       //lose half of bet
-      payout -= initialBet * 1.0 / 2;
+      payout -= initialBet / 2;
     }
   });
 
@@ -391,6 +407,7 @@ function playRound(shoe, initialBet) {
 //the initial card dealt to the dealer will be the dealer's upcard, player gets dealt first
   var playerHand = new Hand();
   var dealerHand = new Hand();
+  var roundResults;
 
   for (var i = 0; i < 2; i++) {
     playerHand.receiveCard(shoe.dealCard());
@@ -401,16 +418,24 @@ function playRound(shoe, initialBet) {
   //now it's time for the player to play the game
   // playerHand.printCardsInHand();
   // console.log("dealerUpcard: " + dealerUpCard);
-  var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
-  // console.log(resultHands);
-  // console.log('----DEALER HAND---');
+  //we must check for dealerblackjack
+  //TODO: this is where you would program insurance
+  if (dealerHand.getHandValue()[0] === 21 && playerHand.getHandValue()[0] !== 21) {
+    roundResults = ["LOSS"];
+  } else if (dealerHand.getHandValue()[0] === 21 && playerHand.getHandValue()[0] === 21) {
+    roundResults = ["PUSH"];
+  } else {
+    var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
+    // console.log(resultHands);
+    // console.log('----DEALER HAND---');
 
-  //player hand(s) completed, play dealer hand then determine winner
-  playDealerHand(dealerHand, shoe);
-  // console.log("Dealer Total: " + dealerHand.getHandValue()[0]);
+    //player hand(s) completed, play dealer hand then determine winner
+    playDealerHand(dealerHand, shoe);
+    // console.log("Dealer Total: " + dealerHand.getHandValue()[0]);
 
-  //handResults will look like ["WIN", "DOUBLE WIN"] (usually just 1 element unless split)
-  var roundResults = determineWinnerForHands(resultHands, dealerHand);
+    //handResults will look like ["WIN", "DOUBLE WIN"] (usually just 1 element unless split)
+    roundResults = determineWinnerForHands(resultHands, dealerHand);
+  }
   // console.log(roundResults);
   var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer)
   bankRoll += payout;
