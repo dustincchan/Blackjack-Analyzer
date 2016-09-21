@@ -351,6 +351,16 @@ function playDealerHand(dealerHand, shoe) {
   }
 }
 
+function isKingAceSuitedBJ(hand) {
+  if (hand.cards[0][1] === hand.cards[1][1]) {
+    if (["K", "A"].indexOf(hand.cards[0][0]) !== -1 && ["K", "A"].indexOf(hand.cards[1][0]) !== -1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
 function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PLAYER", "PUSH", etc...]
   var dealerHandValue = dealerHand.getHandValue();
   var results = [];
@@ -362,7 +372,11 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
     // if player busted he/she loses no matter what)
     //FIXME: check for blackjack before allowing player to play game
     if (playerAction === "BJ" && dealerHandValue[1] !== "BJ") {
-      results.push("NATURAL BLACKJACK");
+      if (isKingAceSuitedBJ(currentHand)) {
+        results.push("KING ACE SUITED BJ");
+      } else {
+        results.push("NATURAL BLACKJACK");
+      }
     } else if (playerAction === "BUST") {
       results.push("LOSS");
     } else if (playerAction === "R") {
@@ -397,7 +411,9 @@ function determineWinnerForHands(playerHands, dealerHand) { // -> ["DEALER", "PL
 function determinePayout(roundResults, initialBet) {
   var payout = 0;
   roundResults.forEach(function(result) {
-    if (result === "NATURAL BLACKJACK") {
+    if (result === "KING ACE SUITED BJ") {
+      payout += initialBet * (2/1);
+    } else if (result === "NATURAL BLACKJACK") {
       payout += initialBet * (3/2);
     } else if (result === "WIN") {
       payout += initialBet;
@@ -458,20 +474,34 @@ function playRound(shoe, initialBet) {
 }
 
 //bringing everything together
-lowestTC = 0;
-highestTC = 0;
 function playNHands(shoe, numHands, minBet) {
   for (var i = 0; i < numHands; i++) {
     if (shoe.isPastPenetration()) {
       shoe.reloadShoe();
     }
-    console.log(shoe.cards.length);
+    var tc = Math.floor(shoe.trueCount);
+    // if (tc >= 1) {
+    //   playRound(shoe, minBet * 1);
+    // } else {
+    //   playRound(shoe, 0);
+    //   i -= 1;
+    // }
+
     playRound(shoe, minBet);
 
-    if (shoe.trueCount < lowestTC) {
-      lowestTC = shoe.trueCount;
-    } else if (shoe.trueCount > highestTC) {
-      highestTC = shoe.trueCount;
-    }
+    // bet spread 1-12
+    // if (tc >= 5) {
+    //   playRound(shoe, minBet * 12);
+    // } else if (tc >= 4 && tc < 5) {
+    //   playRound(shoe, minBet * 11);
+    // } else if (tc >= 3 && tc < 4) {
+    //   playRound(shoe, minBet * 8);
+    // } else if (tc >= 2 && tc < 3) {
+    //   playRound(shoe, minBet * 5);
+    // } else if (tc >= 1 && tc <= 2) {
+    //   playRound(shoe, minBet * 2);
+    // } else {
+    //   playRound(shoe, minBet);
+    // }
   }
 }

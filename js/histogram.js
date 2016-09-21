@@ -1,12 +1,10 @@
 var s = new Shoe(8, 7); //8 decks, 7 deck penetration
 var resultingBankRolls = [];
-for (var i = 0; i < 10; i++) {
+for (var i = 0; i < 2500; i++) {
   bankRoll = 0;
-  playNHands(s, 500, 5);
+  playNHands(s, 200, 5); //200 hands per session of BJ
   resultingBankRolls.push(bankRoll);
 }
-console.log('Highest TC: ' + highestTC);
-console.log('Lowest TC: ' + lowestTC);
 
 var statistics = getStatistics(resultingBankRolls);
 
