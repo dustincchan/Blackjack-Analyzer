@@ -86,6 +86,8 @@ function Deck() {
 function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
   this.decks = [];
   this.cards = [];
+  this.count = 0;
+  this.trueCount = 0;
   this.numDecks = numDecks;
   this.penetration = penetration;
   var that = this;
@@ -99,6 +101,14 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
   }
 
   this.dealCard = function() {
+    var firstCard = that.cards[0][0];
+    if (["10", "J", "Q", "K", "A"].indexOf(firstCard) !== -1) {
+      this.count -= 1;
+    } else if (["2", "3", "4", "5", "6"].indexOf(firstCard) !== -1) {
+      this.count += 1;
+    }
+    var numDecksLeftInShoe = this.cards.length / 52;
+    this.trueCount = this.count / numDecksLeftInShoe;
     return that.cards.shift();
   };
   //identical to dealCard(), but makes the playing code more understandable
@@ -108,6 +118,10 @@ function Shoe(numDecks, penetration) { // -> Shuffled N Decks as a large array
 
   //triggered after drawing past penetration
   this.reloadShoe = function() {
+    this.decks = [];
+    this.cards = [];
+    this.count = 0;
+    this.trueCount = 0;
     //We create a large array of (numDecks) decks and then shuffle it
     for (var deckNum = 0; deckNum < numDecks; deckNum ++) {
       var d = new Deck();
@@ -384,7 +398,7 @@ function determinePayout(roundResults, initialBet) {
   var payout = 0;
   roundResults.forEach(function(result) {
     if (result === "NATURAL BLACKJACK") {
-      payout += initialBet * 1.5;
+      payout += initialBet * (3/2);
     } else if (result === "WIN") {
       payout += initialBet;
     } else if (result === "LOSS") {
@@ -415,9 +429,7 @@ function playRound(shoe, initialBet) {
   }
   //first card dealt to dealer becomes its upcard
   var dealerUpCard = dealerHand.cards[0][0]; //could be int or 'A'
-  //now it's time for the player to play the game
-  // playerHand.printCardsInHand();
-  // console.log("dealerUpcard: " + dealerUpCard);
+
   //we must check for dealerblackjack
   //TODO: this is where you would program insurance
   if (dealerHand.getHandValue()[0] === 21 && playerHand.getHandValue()[0] !== 21) {
@@ -426,8 +438,6 @@ function playRound(shoe, initialBet) {
     roundResults = ["PUSH"];
   } else {
     var resultHands = playHandToCompletion(shoe, playerHand, dealerUpCard);
-    // console.log(resultHands);
-    // console.log('----DEALER HAND---');
 
     //player hand(s) completed, play dealer hand then determine winner
     playDealerHand(dealerHand, shoe);
@@ -436,7 +446,6 @@ function playRound(shoe, initialBet) {
     //handResults will look like ["WIN", "DOUBLE WIN"] (usually just 1 element unless split)
     roundResults = determineWinnerForHands(resultHands, dealerHand);
   }
-  // console.log(roundResults);
   var payout = determinePayout(roundResults, initialBet); //positive or negative $ integer)
   bankRoll += payout;
   bankRollHistory.push(bankRoll);
@@ -446,16 +455,23 @@ function playRound(shoe, initialBet) {
   if (bankRoll > highestBankRollValue) {
     highestBankRollValue = bankRoll;
   }
-  // console.log("Payout: $" + payout);
 }
 
 //bringing everything together
+lowestTC = 0;
+highestTC = 0;
 function playNHands(shoe, numHands, minBet) {
   for (var i = 0; i < numHands; i++) {
-    //gotta shuffle the shoe eventually
     if (shoe.isPastPenetration()) {
       shoe.reloadShoe();
     }
+    console.log(shoe.cards.length);
     playRound(shoe, minBet);
+
+    if (shoe.trueCount < lowestTC) {
+      lowestTC = shoe.trueCount;
+    } else if (shoe.trueCount > highestTC) {
+      highestTC = shoe.trueCount;
+    }
   }
 }
